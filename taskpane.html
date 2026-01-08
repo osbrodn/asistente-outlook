@@ -1,29 +1,76 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistente de Voz Estable</title>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; padding: 15px; background: #f3f2f1; }
-        .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        #status { color: #0078d4; font-weight: bold; margin-bottom: 10px; }
-        .mic-box { font-size: 40px; text-align: center; height: 50px; margin: 10px 0; visibility: hidden; }
-        .active { visibility: visible; animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-        button { width: 100%; padding: 15px; background: #0078d4; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Asistente Voz IA</title>
+
+  <!-- Office JS -->
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+
+  <style>
+    body {
+      font-family: Segoe UI, Arial, sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #f5f5f5;
+    }
+    h1 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px 14px;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+      background-color: #0078d4;
+      color: white;
+    }
+    button:hover {
+      background-color: #005a9e;
+    }
+    #status {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #444;
+    }
+  </style>
 </head>
+
 <body>
-    <div class="card">
-        <div id="status">Listo para procesar no leídos</div>
-        <div id="mic-box" class="mic-box">🎙️</div>
-        <div id="mail-display">
-            <h3 id="current-subject">Presione Iniciar</h3>
-            <p id="current-summary">Se analizarán todos los correos nuevos.</p>
-        </div>
-        <button id="btn-run">INICIAR ASISTENTE TOTAL</button>
-    </div>
-    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <h1>Asistente Voz IA</h1>
+
+  <p>Este asistente permitirá leer correos por voz y procesarlos con IA.</p>
+
+  <button id="btnLeer">Leer correo actual</button>
+
+  <div id="status"></div>
+
+  <script>
+    Office.onReady(() => {
+      document.getElementById("btnLeer").onclick = leerCorreo;
+    });
+
+    function leerCorreo() {
+      const item = Office.context.mailbox.item;
+
+      if (!item) {
+        document.getElementById("status").innerText = "No hay correo activo.";
+        return;
+      }
+
+      item.body.getAsync("text", result => {
+        if (result.status === Office.AsyncResultStatus.Succeeded) {
+          const texto = result.value.substring(0, 500);
+          document.getElementById("status").innerText =
+            "Contenido del correo (preview):\n\n" + texto;
+        } else {
+          document.getElementById("status").innerText =
+            "Error al leer el correo.";
+        }
+      });
+    }
+  </script>
 </body>
 </html>
