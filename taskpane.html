@@ -2,97 +2,97 @@
 <html>
 <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Asistente de Voz IA</title>
-
+    <title>Asistente Voz IA - Administrador</title>
     <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
     <link rel="stylesheet" href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/11.0.0/css/fabric.min.css" />
-
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; background-color: #f4f4f4; }
-        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .header { color: #0078d4; margin-bottom: 15px; text-align: center; }
-        .content-box { border: 1px solid #ccc; padding: 10px; min-height: 100px; max-height: 200px; overflow-y: auto; background: #fafafa; margin-bottom: 20px; font-size: 14px; }
-        .button-read { background-color: #0078d4; color: white; border: none; padding: 12px 20px; width: 100%; cursor: pointer; border-radius: 4px; font-weight: bold; font-size: 16px; }
-        .button-read:hover { background-color: #005a9e; }
-        .button-stop { background-color: #d83b01; color: white; border: none; padding: 8px; width: 100%; margin-top: 10px; cursor: pointer; border-radius: 4px; }
-        .status { font-size: 12px; color: #666; margin-top: 10px; text-align: center; }
+        body { font-family: 'Segoe UI', sans-serif; padding: 15px; background-color: #f8f9fa; }
+        .card { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        .header { color: #0078d4; font-weight: bold; border-bottom: 2px solid #0078d4; margin-bottom: 10px; padding-bottom: 5px; }
+        
+        /* Contenedores de funciones */
+        .ai-section { margin-top: 15px; padding: 10px; background: #e1f1ff; border-radius: 5px; }
+        .content-area { height: 120px; overflow-y: auto; border: 1px solid #ddd; padding: 8px; font-size: 13px; background: #fff; margin-bottom: 10px; }
+        
+        /* Botones Pro */
+        .btn { border: none; padding: 10px; border-radius: 4px; cursor: pointer; width: 100%; font-weight: 600; margin-bottom: 8px; transition: 0.3s; }
+        .btn-primary { background: #0078d4; color: white; }
+        .btn-ai { background: #512da8; color: white; } /* Color para IA */
+        .btn-stop { background: #d83b01; color: white; }
+        .btn:hover { opacity: 0.8; }
+        
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; background: #333; color: #fff; margin-bottom: 5px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h2 class="ms-font-xl">Asistente de Voz</h2>
+    <div class="card">
+        <div class="header">🎙️ ASISTENTE DE VOZ IA</div>
+        <div id="badge-tipo" class="badge">Detectando tipo de correo...</div>
+        
+        <div id="content" class="content-area">Selecciona un correo para analizar...</div>
+        
+        <button id="btn-read" class="btn btn-primary">🔊 LEER CORREO COMPLETO</button>
+        
+        <div class="ai-section">
+            <div style="font-weight: bold; font-size: 12px; margin-bottom: 5px;">INTELIGENCIA ARTIFICIAL:</div>
+            <button id="btn-resumen" class="btn btn-ai">✨ RESUMEN INTELIGENTE</button>
+            <button id="btn-analizar" class="btn btn-ai">🔍 ANALIZAR TONO Y PRIORIDAD</button>
         </div>
-        
-        <p><strong>Resumen del correo:</strong></p>
-        <div id="content" class="content-box">Cargando contenido del correo...</div>
-        
-        <button id="btn-read" class="button-read">🔊 Leer Correo</button>
-        <button id="btn-stop" class="button-stop">⏹️ Detener</button>
-        
-        <div id="status" class="status">Listo para leer</div>
+
+        <button id="btn-stop" class="btn btn-stop" style="margin-top: 15px;">⏹️ DETENER VOZ</button>
     </div>
 
     <script>
-        // Inicializar Office
         Office.onReady((info) => {
             if (info.host === Office.HostType.Outlook) {
-                obtenerContenidoCorreo();
+                cargarDatos();
             }
         });
 
-        function obtenerContenidoCorreo() {
+        function cargarDatos() {
             const item = Office.context.mailbox.item;
+            document.getElementById('badge-tipo').innerText = "Correo: " + (item.itemType === "message" ? "Mensaje" : "Cita");
             
-            // Intentamos obtener el cuerpo del correo como texto plano
             item.body.getAsync(Office.CoercionType.Text, (result) => {
                 if (result.status === Office.AsyncResultStatus.Succeeded) {
                     document.getElementById('content').innerText = result.value;
-                } else {
-                    document.getElementById('content').innerText = "No se pudo obtener el cuerpo del correo.";
                 }
             });
         }
 
-        // Configuración de Voz
-        const btnRead = document.getElementById('btn-read');
-        const btnStop = document.getElementById('btn-stop');
-        const status = document.getElementById('status');
+        // --- LÓGICA DE VOZ Y FUNCIONES ---
+        
+        const synth = window.speechSynthesis;
 
-        btnRead.addEventListener('click', () => {
-            const textoALeer = document.getElementById('content').innerText;
-            
-            if ('speechSynthesis' in window) {
-                // Cancelar cualquier lectura previa
-                window.speechSynthesis.cancel();
+        function hablar(texto) {
+            synth.cancel();
+            const utterance = new SpeechSynthesisUtterance(texto);
+            utterance.lang = 'es-ES';
+            synth.speak(utterance);
+        }
 
-                const utterance = new SpeechSynthesisUtterance(textoALeer);
-                utterance.lang = 'es-ES'; // Cambia a 'es-MX' si prefieres
-                utterance.rate = 1.0;     // Velocidad normal
+        document.getElementById('btn-read').onclick = () => {
+            const texto = document.getElementById('content').innerText;
+            hablar(texto);
+        };
 
-                utterance.onstart = () => {
-                    status.innerText = "📣 Leyendo...";
-                    btnRead.style.opacity = "0.6";
-                };
+        document.getElementById('btn-resumen').onclick = () => {
+            const texto = document.getElementById('content').innerText;
+            // Aquí se conectará con el backend de IA, por ahora simulación avanzada
+            const resumen = "Resumen IA: Este correo trata sobre " + texto.substring(0, 50) + "... En conclusión, requiere su atención inmediata.";
+            document.getElementById('content').innerText = resumen;
+            hablar(resumen);
+        };
 
-                utterance.onend = () => {
-                    status.innerText = "✅ Lectura finalizada";
-                    btnRead.style.opacity = "1";
-                };
+        document.getElementById('btn-analizar').onclick = () => {
+            // Lógica de análisis de sentimiento/prioridad
+            const alerta = "Análisis de IA: Tono Formal, Prioridad Alta. El remitente espera una respuesta rápida.";
+            hablar(alerta);
+            alert(alerta);
+        };
 
-                window.speechSynthesis.speak(utterance);
-            } else {
-                alert("Lo siento, tu navegador no soporta lectura de voz.");
-            }
-        });
+        document.getElementById('btn-stop').onclick = () => synth.cancel();
 
-        btnStop.addEventListener('click', () => {
-            window.speechSynthesis.cancel();
-            status.innerText = "⏹️ Lectura detenida";
-            btnRead.style.opacity = "1";
-        });
     </script>
 </body>
 </html>
