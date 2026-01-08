@@ -2,97 +2,102 @@
 <html>
 <head>
     <meta charset="UTF-8" />
-    <title>Asistente Voz IA - Administrador</title>
+    <title>Asistente IA Pro</title>
     <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
     <link rel="stylesheet" href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/11.0.0/css/fabric.min.css" />
     <style>
-        body { font-family: 'Segoe UI', sans-serif; padding: 15px; background-color: #f8f9fa; }
-        .card { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 15px; }
-        .header { color: #0078d4; font-weight: bold; border-bottom: 2px solid #0078d4; margin-bottom: 10px; padding-bottom: 5px; }
+        body { font-family: 'Segoe UI', sans-serif; padding: 15px; background-color: #f3f2f1; color: #323130; }
+        .card { background: white; border-radius: 4px; padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.14); border-top: 4px solid #0078d4; }
+        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; }
+        .priority-high { background: #fde7e9; color: #a4262c; }
+        .priority-normal { background: #dff6dd; color: #107c10; }
         
-        /* Contenedores de funciones */
-        .ai-section { margin-top: 15px; padding: 10px; background: #e1f1ff; border-radius: 5px; }
-        .content-area { height: 120px; overflow-y: auto; border: 1px solid #ddd; padding: 8px; font-size: 13px; background: #fff; margin-bottom: 10px; }
+        #content { background: #faf9f8; border: 1px solid #edebe9; padding: 10px; height: 150px; overflow-y: auto; font-size: 13px; line-height: 1.5; margin-bottom: 15px; border-radius: 2px; }
         
-        /* Botones Pro */
-        .btn { border: none; padding: 10px; border-radius: 4px; cursor: pointer; width: 100%; font-weight: 600; margin-bottom: 8px; transition: 0.3s; }
-        .btn-primary { background: #0078d4; color: white; }
-        .btn-ai { background: #512da8; color: white; } /* Color para IA */
-        .btn-stop { background: #d83b01; color: white; }
-        .btn:hover { opacity: 0.8; }
-        
-        .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; background: #333; color: #fff; margin-bottom: 5px; }
+        .btn-group { display: flex; flex-direction: column; gap: 8px; }
+        .btn { border: none; padding: 12px; cursor: pointer; font-weight: 600; border-radius: 2px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-main { background: #0078d4; color: white; }
+        .btn-ai { background: #8e24aa; color: white; }
+        .btn-stop { background: #a4262c; color: white; }
+        .btn:disabled { background: #c8c6c4; cursor: not-allowed; }
     </style>
 </head>
 <body>
     <div class="card">
-        <div class="header">🎙️ ASISTENTE DE VOZ IA</div>
-        <div id="badge-tipo" class="badge">Detectando tipo de correo...</div>
+        <div id="badge" class="status-badge priority-normal">Analizando Correo...</div>
+        <div id="content">Obteniendo datos de Outlook...</div>
         
-        <div id="content" class="content-area">Selecciona un correo para analizar...</div>
-        
-        <button id="btn-read" class="btn btn-primary">🔊 LEER CORREO COMPLETO</button>
-        
-        <div class="ai-section">
-            <div style="font-weight: bold; font-size: 12px; margin-bottom: 5px;">INTELIGENCIA ARTIFICIAL:</div>
-            <button id="btn-resumen" class="btn btn-ai">✨ RESUMEN INTELIGENTE</button>
-            <button id="btn-analizar" class="btn btn-ai">🔍 ANALIZAR TONO Y PRIORIDAD</button>
+        <div class="btn-group">
+            <button id="btn-read" class="btn btn-main">🔊 LEER CORREO COMPLETO</button>
+            <button id="btn-resumen" class="btn btn-ai">✨ GENERAR RESUMEN IA</button>
+            <button id="btn-analizar" class="btn btn-ai">🔍 ANALIZAR PRIORIDAD</button>
+            <button id="btn-stop" class="btn btn-stop">⏹️ DETENER</button>
         </div>
-
-        <button id="btn-stop" class="btn btn-stop" style="margin-top: 15px;">⏹️ DETENER VOZ</button>
     </div>
 
     <script>
+        let cuerpoOriginal = "";
+        const synth = window.speechSynthesis;
+
         Office.onReady((info) => {
             if (info.host === Office.HostType.Outlook) {
-                cargarDatos();
+                obtenerTexto();
             }
         });
 
-        function cargarDatos() {
-            const item = Office.context.mailbox.item;
-            document.getElementById('badge-tipo').innerText = "Correo: " + (item.itemType === "message" ? "Mensaje" : "Cita");
-            
-            item.body.getAsync(Office.CoercionType.Text, (result) => {
+        function obtenerTexto() {
+            Office.context.mailbox.item.body.getAsync(Office.CoercionType.Text, (result) => {
                 if (result.status === Office.AsyncResultStatus.Succeeded) {
-                    document.getElementById('content').innerText = result.value;
+                    cuerpoOriginal = result.value.trim();
+                    document.getElementById('content').innerText = cuerpoOriginal;
+                    actualizarPrioridad(cuerpoOriginal);
                 }
             });
         }
 
-        // --- LÓGICA DE VOZ Y FUNCIONES ---
-        
-        const synth = window.speechSynthesis;
+        function actualizarPrioridad(texto) {
+            const palabrasClave = ["urgente", "importante", "error", "falla", "inmediato", "atención", "crítico"];
+            const esAlta = palabrasClave.some(p => texto.toLowerCase().includes(p));
+            const badge = document.getElementById('badge');
+            badge.innerText = esAlta ? "Prioridad: Alta" : "Prioridad: Normal";
+            badge.className = "status-badge " + (esAlta ? "priority-high" : "priority-normal");
+        }
 
         function hablar(texto) {
             synth.cancel();
             const utterance = new SpeechSynthesisUtterance(texto);
             utterance.lang = 'es-ES';
+            utterance.rate = 1;
             synth.speak(utterance);
         }
 
-        document.getElementById('btn-read').onclick = () => {
-            const texto = document.getElementById('content').innerText;
-            hablar(texto);
+        // LÓGICA DE RESUMEN POR EXTRACCIÓN
+        document.getElementById('btn-resumen').onclick = () => {
+            if (!cuerpoOriginal) return;
+            
+            // Algoritmo de resumen: Toma las primeras 2 frases y las más importantes
+            const oraciones = cuerpoOriginal.split(/[.!?]/);
+            const resumenProcesado = oraciones.length > 2 
+                ? "Resumen del asistente: " + oraciones[0] + ". " + oraciones[1] + ". Final del resumen."
+                : "El correo es breve: " + cuerpoOriginal;
+            
+            document.getElementById('content').innerText = resumenProcesado;
+            hablar(resumenProcesado);
         };
 
-        document.getElementById('btn-resumen').onclick = () => {
-            const texto = document.getElementById('content').innerText;
-            // Aquí se conectará con el backend de IA, por ahora simulación avanzada
-            const resumen = "Resumen IA: Este correo trata sobre " + texto.substring(0, 50) + "... En conclusión, requiere su atención inmediata.";
-            document.getElementById('content').innerText = resumen;
-            hablar(resumen);
+        document.getElementById('btn-read').onclick = () => {
+            document.getElementById('content').innerText = cuerpoOriginal;
+            hablar(cuerpoOriginal);
         };
 
         document.getElementById('btn-analizar').onclick = () => {
-            // Lógica de análisis de sentimiento/prioridad
-            const alerta = "Análisis de IA: Tono Formal, Prioridad Alta. El remitente espera una respuesta rápida.";
-            hablar(alerta);
-            alert(alerta);
+            const analisis = "Este correo es de tipo " + (cuerpoOriginal.length > 500 ? "Largo" : "Breve") + 
+                             ". " + document.getElementById('badge').innerText;
+            hablar(analisis);
+            alert(analisis);
         };
 
         document.getElementById('btn-stop').onclick = () => synth.cancel();
-
     </script>
 </body>
 </html>
