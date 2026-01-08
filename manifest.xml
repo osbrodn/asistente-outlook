@@ -1,78 +1,77 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" 
-           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-           xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0" 
-           xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides/1.0" 
-           xsi:type="MailApp">
-  
-  <Id>b2c15421-2e6d-4f22-987b-888f223d5641</Id>
-  <Version>1.0.0.1</Version>
-  <ProviderName>Asistente IA Profesional</ProviderName>
+<?xml version="1.0" encoding="UTF-8"?>
+<OfficeApp 
+  xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0" 
+  xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides" 
+  xsi:type="MailApp">
+
+  <Id>e3d4c5a6-2b3c-4d5e-6f7a-8b9c0d1e2f3a</Id>
+  <Version>1.0.7.0</Version>
+  <ProviderName>AsistenteVoz</ProviderName>
   <DefaultLocale>es-ES</DefaultLocale>
-  <DisplayName DefaultValue="Asistente de Voz IA" />
-  <Description DefaultValue="Asistente multilingüe que lee y contesta correos por voz." />
-  
-  <IconUrl DefaultValue="https://github.com/osbrodn/asistente-outlook/assets/icon-32.png" />
-  <HighResolutionIconUrl DefaultValue="https://github.com/osbrodn/asistente-outlook/assets/icon-80.png" />
-  
+  <DisplayName DefaultValue="Asistente Voz IA"/>
+  <Description DefaultValue="Lector de correos por voz inteligente."/>
+
+  <IconUrl DefaultValue="https://osbrodn.github.io/asistente-outlook/icon-64.png"/>
+  <HighResolutionIconUrl DefaultValue="https://osbrodn.github.io/asistente-outlook/icon-128.png"/>
+  <SupportUrl DefaultValue="https://osbrodn.github.io/asistente-outlook/"/>
+
+  <AppDomains>
+    <AppDomain>osbrodn.github.io</AppDomain>
+  </AppDomains>
+
   <Hosts>
-    <Host Name="Mailbox" />
+    <Host Name="Mailbox"/>
   </Hosts>
-  
+
   <Requirements>
     <Sets>
-      <Set Name="Mailbox" MinVersion="1.1" />
+      <Set Name="Mailbox" MinVersion="1.1"/>
     </Sets>
   </Requirements>
-  
+
   <FormSettings>
     <Form xsi:type="ItemRead">
       <DesktopSettings>
-        <SourceLocation DefaultValue="https://github.com/osbrodn/asistente-outlook/taskpane.html" />
+        <SourceLocation DefaultValue="https://osbrodn.github.io/asistente-outlook/taskpane.html"/>
         <RequestedHeight>450</RequestedHeight>
       </DesktopSettings>
-      <TabletSettings>
-        <SourceLocation DefaultValue="https://github.com/osbrodn/asistente-outlook/taskpane.html" />
-      </TabletSettings>
-      <PhoneSettings>
-        <SourceLocation DefaultValue="https://github.com/osbrodn/asistente-outlook/taskpane.html" />
-      </PhoneSettings>
     </Form>
   </FormSettings>
 
   <Permissions>ReadWriteMailbox</Permissions>
-  
+
   <Rule xsi:type="RuleCollection" Mode="And">
-    <Rule xsi:type="ItemIs" ItemType="Message" FormType="Read" />
+    <Rule xsi:type="ItemIs" ItemType="Message" FormType="Read"/>
   </Rule>
-  
-  <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides/1.0" xsi:type="VersionOverridesV1_0">
+
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides" xsi:type="VersionOverridesV1_0">
     <Requirements>
-      <bt:Sets DefaultMinVersion="1.3">
-        <bt:Set Name="Mailbox" />
+      <bt:Sets DefaultMinVersion="1.1">
+        <bt:Set Name="Mailbox"/>
       </bt:Sets>
     </Requirements>
     <Hosts>
       <Host xsi:type="MailHost">
         <DesktopFormFactor>
-          <FunctionFile resid="residFunctionFile" />
+          <FunctionFile resid="residFunctionFile"/>
           <ExtensionPoint xsi:type="MessageReadCommandSurface">
             <OfficeTab id="TabDefault">
               <Group id="msgReadGroup">
-                <Label resid="residGroupLabel" />
+                <Label resid="residGroupLabel"/>
                 <Control xsi:type="Button" id="msgReadOpenPaneButton">
-                  <Label resid="residPaneButtonLabel" />
+                  <Label resid="residPaneButtonLabel"/>
                   <Supertip>
-                    <Title resid="residPaneButtonLabel" />
-                    <Description resid="residPaneButtonToolTip" />
+                    <Title resid="residPaneButtonLabel"/>
+                    <Description resid="residPaneButtonToolTip"/>
                   </Supertip>
                   <Icon>
-                    <bt:Image size="16" resid="icon16" />
-                    <bt:Image size="32" resid="icon32" />
-                    <bt:Image size="80" resid="icon80" />
+                    <bt:Image size="64" resid="icon64"/>
+                    <bt:Image size="128" resid="icon128"/>
                   </Icon>
                   <Action xsi:type="ShowTaskpane">
-                    <SourceLocation resid="residTaskpaneUrl" />
+                    <SourceLocation resid="residTaskpaneUrl"/>
                   </Action>
                 </Control>
               </Group>
@@ -81,23 +80,21 @@
         </DesktopFormFactor>
       </Host>
     </Hosts>
-    
     <Resources>
       <bt:Images>
-        <bt:Image id="icon16" DefaultValue="https://github.com/osbrodn/asistente-outlook/assets/icon-16.png" />
-        <bt:Image id="icon32" DefaultValue="https://github.com/osbrodn/asistente-outlook/assets/icon-32.png" />
-        <bt:Image id="icon80" DefaultValue="https://github.com/osbrodn/asistente-outlook/assets/icon-80.png" />
+        <bt:Image id="icon64" DefaultValue="https://osbrodn.github.io/asistente-outlook/icon-64.png"/>
+        <bt:Image id="icon128" DefaultValue="https://osbrodn.github.io/asistente-outlook/icon-128.png"/>
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="residFunctionFile" DefaultValue="https://github.com/osbrodn/asistente-outlook/commands.html" />
-        <bt:Url id="residTaskpaneUrl" DefaultValue="https://github.com/osbrodn/asistente-outlook/taskpane.html" />
+        <bt:Url id="residTaskpaneUrl" DefaultValue="https://osbrodn.github.io/asistente-outlook/taskpane.html"/>
+        <bt:Url id="residFunctionFile" DefaultValue="https://osbrodn.github.io/asistente-outlook/functions.js"/>
       </bt:Urls>
       <bt:ShortStrings>
-        <bt:String id="residGroupLabel" DefaultValue="Asistente Voz" />
-        <bt:String id="residPaneButtonLabel" DefaultValue="Abrir Lector IA" />
+        <bt:String id="residGroupLabel" DefaultValue="Asistente"/>
+        <bt:String id="residPaneButtonLabel" DefaultValue="Abrir IA"/>
       </bt:ShortStrings>
       <bt:LongStrings>
-        <bt:String id="residPaneButtonToolTip" DefaultValue="Activa el asistente para leer tus correos." />
+        <bt:String id="residPaneButtonToolTip" DefaultValue="Escucha tus correos."/>
       </bt:LongStrings>
     </Resources>
   </VersionOverrides>
