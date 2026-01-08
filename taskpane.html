@@ -19,19 +19,18 @@
         .btn-main { background: #0078d4; color: white; }
         .btn-ai { background: #8e24aa; color: white; }
         .btn-stop { background: #a4262c; color: white; }
-        .btn:disabled { background: #c8c6c4; cursor: not-allowed; }
+        .btn:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
     <div class="card">
-        <div id="badge" class="status-badge priority-normal">Analizando Correo...</div>
-        <div id="content">Obteniendo datos de Outlook...</div>
+        <div id="badge" class="status-badge priority-normal">Analizando...</div>
+        <div id="content">Obteniendo cuerpo del correo...</div>
         
         <div class="btn-group">
             <button id="btn-read" class="btn btn-main">🔊 LEER CORREO COMPLETO</button>
-            <button id="btn-resumen" class="btn btn-ai">✨ GENERAR RESUMEN IA</button>
-            <button id="btn-analizar" class="btn btn-ai">🔍 ANALIZAR PRIORIDAD</button>
-            <button id="btn-stop" class="btn btn-stop">⏹️ DETENER</button>
+            <button id="btn-resumen" class="btn btn-ai">✨ RESUMEN POR IA</button>
+            <button id="btn-stop" class="btn btn-stop">⏹️ DETENER LECTURA</button>
         </div>
     </div>
 
@@ -41,60 +40,47 @@
 
         Office.onReady((info) => {
             if (info.host === Office.HostType.Outlook) {
-                obtenerTexto();
+                cargarContenido();
             }
         });
 
-        function obtenerTexto() {
+        function cargarContenido() {
             Office.context.mailbox.item.body.getAsync(Office.CoercionType.Text, (result) => {
                 if (result.status === Office.AsyncResultStatus.Succeeded) {
                     cuerpoOriginal = result.value.trim();
                     document.getElementById('content').innerText = cuerpoOriginal;
-                    actualizarPrioridad(cuerpoOriginal);
+                    
+                    // Lógica de Prioridad
+                    const urgencia = ["urgente", "importante", "atención", "error", "falla", "crítico"];
+                    const esAlta = urgencia.some(p => cuerpoOriginal.toLowerCase().includes(p));
+                    const badge = document.getElementById('badge');
+                    badge.innerText = esAlta ? "Prioridad: ALTA" : "Prioridad: NORMAL";
+                    badge.className = "status-badge " + (esAlta ? "priority-high" : "priority-normal");
                 }
             });
-        }
-
-        function actualizarPrioridad(texto) {
-            const palabrasClave = ["urgente", "importante", "error", "falla", "inmediato", "atención", "crítico"];
-            const esAlta = palabrasClave.some(p => texto.toLowerCase().includes(p));
-            const badge = document.getElementById('badge');
-            badge.innerText = esAlta ? "Prioridad: Alta" : "Prioridad: Normal";
-            badge.className = "status-badge " + (esAlta ? "priority-high" : "priority-normal");
         }
 
         function hablar(texto) {
             synth.cancel();
             const utterance = new SpeechSynthesisUtterance(texto);
             utterance.lang = 'es-ES';
-            utterance.rate = 1;
             synth.speak(utterance);
         }
-
-        // LÓGICA DE RESUMEN POR EXTRACCIÓN
-        document.getElementById('btn-resumen').onclick = () => {
-            if (!cuerpoOriginal) return;
-            
-            // Algoritmo de resumen: Toma las primeras 2 frases y las más importantes
-            const oraciones = cuerpoOriginal.split(/[.!?]/);
-            const resumenProcesado = oraciones.length > 2 
-                ? "Resumen del asistente: " + oraciones[0] + ". " + oraciones[1] + ". Final del resumen."
-                : "El correo es breve: " + cuerpoOriginal;
-            
-            document.getElementById('content').innerText = resumenProcesado;
-            hablar(resumenProcesado);
-        };
 
         document.getElementById('btn-read').onclick = () => {
             document.getElementById('content').innerText = cuerpoOriginal;
             hablar(cuerpoOriginal);
         };
 
-        document.getElementById('btn-analizar').onclick = () => {
-            const analisis = "Este correo es de tipo " + (cuerpoOriginal.length > 500 ? "Largo" : "Breve") + 
-                             ". " + document.getElementById('badge').innerText;
-            hablar(analisis);
-            alert(analisis);
+        document.getElementById('btn-resumen').onclick = () => {
+            if (!cuerpoOriginal) return;
+            const oraciones = cuerpoOriginal.split(/[.!?]/);
+            const resumen = oraciones.length > 2 
+                ? "Resumen IA: " + oraciones[0] + ". " + oraciones[1] + "."
+                : "El correo es corto: " + cuerpoOriginal;
+            
+            document.getElementById('content').innerText = resumen;
+            hablar(resumen);
         };
 
         document.getElementById('btn-stop').onclick = () => synth.cancel();
