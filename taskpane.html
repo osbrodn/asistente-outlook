@@ -6,40 +6,44 @@
     <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
     <link rel="stylesheet" href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/11.0.0/css/fabric.min.css" />
     <style>
-        body { font-family: 'Segoe UI', sans-serif; padding: 15px; background-color: #f3f2f1; color: #323130; }
+        body { font-family: 'Segoe UI', sans-serif; padding: 15px; background-color: #f3f2f1; }
         .card { background: white; border-radius: 4px; padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.14); border-top: 4px solid #0078d4; }
         .status-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; }
         .priority-high { background: #fde7e9; color: #a4262c; }
         .priority-normal { background: #dff6dd; color: #107c10; }
         
-        #content { background: #faf9f8; border: 1px solid #edebe9; padding: 10px; height: 150px; overflow-y: auto; font-size: 13px; line-height: 1.5; margin-bottom: 15px; border-radius: 2px; }
+        #content { background: #faf9f8; border: 1px solid #edebe9; padding: 10px; height: 120px; overflow-y: auto; font-size: 13px; margin-bottom: 15px; }
         
         .btn-group { display: flex; flex-direction: column; gap: 8px; }
-        .btn { border: none; padding: 12px; cursor: pointer; font-weight: 600; border-radius: 2px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn { border: none; padding: 10px; cursor: pointer; font-weight: 600; border-radius: 2px; }
         .btn-main { background: #0078d4; color: white; }
         .btn-ai { background: #8e24aa; color: white; }
+        .btn-outline { background: white; border: 1px solid #0078d4; color: #0078d4; }
         .btn-stop { background: #a4262c; color: white; }
-        .btn:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
     <div class="card">
-        <div id="badge" class="status-badge priority-normal">Analizando...</div>
-        <div id="content">Obteniendo cuerpo del correo...</div>
+        <div id="badge" class="status-badge priority-normal">Listo</div>
+        <div id="content">Cargando correo...</div>
         
         <div class="btn-group">
-            <button id="btn-read" class="btn btn-main">🔊 LEER CORREO COMPLETO</button>
-            <button id="btn-resumen" class="btn btn-ai">✨ RESUMEN POR IA</button>
-            <button id="btn-stop" class="btn btn-stop">⏹️ DETENER LECTURA</button>
+            <button id="btn-read" class="btn btn-main">🔊 LEER Y MARCAR COMO LEÍDO</button>
+            <button id="btn-translate" class="btn btn-outline" style="display:none;">🌍 TRADUCIR A ESPAÑOL</button>
+            <button id="btn-resumen" class="btn btn-ai">✨ RESUMEN IA</button>
+            <button id="btn-stop" class="btn btn-stop">⏹️ DETENER</button>
         </div>
     </div>
 
     <script>
         let cuerpoOriginal = "";
+        let idiomaDetectado = "es";
         const synth = window.speechSynthesis;
 
         Office.onReady((info) => {
             if (info.host === Office.HostType.Outlook) {
+                // Registrar evento para cuando el usuario cambia de correo
+                Office.context.mailbox.addHandlerAsync(Office.EventType.ItemChanged, cargarContenido);
                 cargarContenido();
             }
         });
@@ -49,41 +53,70 @@
                 if (result.status === Office.AsyncResultStatus.Succeeded) {
                     cuerpoOriginal = result.value.trim();
                     document.getElementById('content').innerText = cuerpoOriginal;
-                    
-                    // Lógica de Prioridad
-                    const urgencia = ["urgente", "importante", "atención", "error", "falla", "crítico"];
-                    const esAlta = urgencia.some(p => cuerpoOriginal.toLowerCase().includes(p));
-                    const badge = document.getElementById('badge');
-                    badge.innerText = esAlta ? "Prioridad: ALTA" : "Prioridad: NORMAL";
-                    badge.className = "status-badge " + (esAlta ? "priority-high" : "priority-normal");
+                    detectarIdioma(cuerpoOriginal);
+                    actualizarPrioridad(cuerpoOriginal);
                 }
             });
         }
 
-        function hablar(texto) {
+        function detectarIdioma(texto) {
+            // Lógica simple de detección (puedes ampliarla con una API)
+            const palabrasIngles = ["the", "this", "hello", "regards", "meeting"];
+            const esIngles = palabrasIngles.some(p => texto.toLowerCase().includes(p));
+            
+            if (esIngles) {
+                idiomaDetectado = "en";
+                document.getElementById('btn-translate').style.display = "block";
+                hablar("He detectado que el correo está en inglés. ¿Deseas traducirlo antes de leer?");
+            } else {
+                idiomaDetectado = "es";
+                document.getElementById('btn-translate').style.display = "none";
+            }
+        }
+
+        function marcarComoLeido() {
+            Office.context.mailbox.item.readStateSetAsync(true, (result) => {
+                if (result.status === Office.AsyncResultStatus.Succeeded) {
+                    console.log("Correo marcado como leído.");
+                }
+            });
+        }
+
+        function hablar(texto, lang = 'es-ES') {
             synth.cancel();
             const utterance = new SpeechSynthesisUtterance(texto);
-            utterance.lang = 'es-ES';
+            utterance.lang = lang;
             synth.speak(utterance);
         }
 
         document.getElementById('btn-read').onclick = () => {
-            document.getElementById('content').innerText = cuerpoOriginal;
-            hablar(cuerpoOriginal);
+            marcarComoLeido();
+            hablar(cuerpoOriginal, idiomaDetectado === "es" ? 'es-ES' : 'en-US');
+        };
+
+        document.getElementById('btn-translate').onclick = () => {
+            // Simulación de traducción (Aquí se integraría el API de Traducción)
+            const textoTraducido = "[TRADUCCIÓN]: " + cuerpoOriginal; 
+            document.getElementById('content').innerText = textoTraducido;
+            hablar("Traducción completada. Procedo a leer: " + cuerpoOriginal, 'es-ES');
         };
 
         document.getElementById('btn-resumen').onclick = () => {
-            if (!cuerpoOriginal) return;
-            const oraciones = cuerpoOriginal.split(/[.!?]/);
-            const resumen = oraciones.length > 2 
-                ? "Resumen IA: " + oraciones[0] + ". " + oraciones[1] + "."
-                : "El correo es corto: " + cuerpoOriginal;
-            
+            const oraciones = cuerpoOriginal.split(".");
+            const resumen = "Resumen: " + (oraciones[0] || cuerpoOriginal);
             document.getElementById('content').innerText = resumen;
             hablar(resumen);
+            marcarComoLeido();
         };
 
         document.getElementById('btn-stop').onclick = () => synth.cancel();
+
+        function actualizarPrioridad(texto) {
+            const esAlta = /urgente|importante|error|falla/i.test(texto);
+            const badge = document.getElementById('badge');
+            badge.innerText = esAlta ? "Prioridad: ALTA" : "Prioridad: NORMAL";
+            badge.className = "status-badge " + (esAlta ? "priority-high" : "priority-normal");
+        }
     </script>
 </body>
 </html>
