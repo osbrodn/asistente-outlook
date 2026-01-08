@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente de Voz Estable</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 15px; background: #f3f2f1; }
+        .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        #status { color: #0078d4; font-weight: bold; margin-bottom: 10px; }
+        .mic-box { font-size: 40px; text-align: center; height: 50px; margin: 10px 0; visibility: hidden; }
+        .active { visibility: visible; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        button { width: 100%; padding: 15px; background: #0078d4; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div id="status">Listo para procesar no leídos</div>
+        <div id="mic-box" class="mic-box">🎙️</div>
+        <div id="mail-display">
+            <h3 id="current-subject">Presione Iniciar</h3>
+            <p id="current-summary">Se analizarán todos los correos nuevos.</p>
+        </div>
+        <button id="btn-run">INICIAR ASISTENTE TOTAL</button>
+    </div>
+    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+</body>
+</html>
