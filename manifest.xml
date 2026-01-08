@@ -12,8 +12,8 @@
   <DisplayName DefaultValue="Asistente de Voz IA" />
   <Description DefaultValue="Asistente multilingüe que lee y contesta correos por voz." />
   
-  <IconUrl DefaultValue="https://TU_URL_HTTPS/assets/icon-32.png" />
-  <HighResolutionIconUrl DefaultValue="https://TU_URL_HTTPS/assets/icon-80.png" />
+  <IconUrl DefaultValue="https://github.com/osbrodn/asistente-outlook/assets/icon-32.png" />
+  <HighResolutionIconUrl DefaultValue="https://github.com/osbrodn/asistente-outlook/assets/icon-80.png" />
   
   <Hosts>
     <Host Name="Mailbox" />
@@ -28,14 +28,14 @@
   <FormSettings>
     <Form xsi:type="ItemRead">
       <DesktopSettings>
-        <SourceLocation DefaultValue="https://TU_URL_HTTPS/taskpane.html" />
+        <SourceLocation DefaultValue="https://github.com/osbrodn/asistente-outlook/taskpane.html" />
         <RequestedHeight>450</RequestedHeight>
       </DesktopSettings>
       <TabletSettings>
-        <SourceLocation DefaultValue="https://TU_URL_HTTPS/taskpane.html" />
+        <SourceLocation DefaultValue="https://github.com/osbrodn/asistente-outlook/taskpane.html" />
       </TabletSettings>
       <PhoneSettings>
-        <SourceLocation DefaultValue="https://TU_URL_HTTPS/taskpane.html" />
+        <SourceLocation DefaultValue="https://github.com/osbrodn/asistente-outlook/taskpane.html" />
       </PhoneSettings>
     </Form>
   </FormSettings>
@@ -84,13 +84,13 @@
     
     <Resources>
       <bt:Images>
-        <bt:Image id="icon16" DefaultValue="https://TU_URL_HTTPS/assets/icon-16.png" />
-        <bt:Image id="icon32" DefaultValue="https://TU_URL_HTTPS/assets/icon-32.png" />
-        <bt:Image id="icon80" DefaultValue="https://TU_URL_HTTPS/assets/icon-80.png" />
+        <bt:Image id="icon16" DefaultValue="https://github.com/osbrodn/asistente-outlook/assets/icon-16.png" />
+        <bt:Image id="icon32" DefaultValue="https://github.com/osbrodn/asistente-outlook/assets/icon-32.png" />
+        <bt:Image id="icon80" DefaultValue="https://github.com/osbrodn/asistente-outlook/assets/icon-80.png" />
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="residFunctionFile" DefaultValue="https://TU_URL_HTTPS/commands.html" />
-        <bt:Url id="residTaskpaneUrl" DefaultValue="https://TU_URL_HTTPS/taskpane.html" />
+        <bt:Url id="residFunctionFile" DefaultValue="https://github.com/osbrodn/asistente-outlook/commands.html" />
+        <bt:Url id="residTaskpaneUrl" DefaultValue="https://github.com/osbrodn/asistente-outlook/taskpane.html" />
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="residGroupLabel" DefaultValue="Asistente Voz" />
