@@ -2,38 +2,33 @@
 <html>
 <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Asistente de Voz IA Pro</title>
+    <title>Asistente IA Pro - Edición México</title>
     <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
     <link rel="stylesheet" href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/11.0.0/css/fabric.min.css" />
     <style>
-        body { font-family: 'Segoe UI', sans-serif; padding: 15px; background-color: #f3f2f1; color: #323130; }
+        body { font-family: 'Segoe UI', sans-serif; padding: 15px; background-color: #f3f2f1; }
         .card { background: white; border-radius: 4px; padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.14); border-top: 4px solid #0078d4; }
         .status-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; }
         .priority-high { background: #fde7e9; color: #a4262c; }
         .priority-normal { background: #dff6dd; color: #107c10; }
-        
-        #content { background: #faf9f8; border: 1px solid #edebe9; padding: 10px; height: 140px; overflow-y: auto; font-size: 13px; line-height: 1.5; margin-bottom: 15px; border-radius: 2px; white-space: pre-wrap; }
-        
+        #content { background: #faf9f8; border: 1px solid #edebe9; padding: 10px; height: 120px; overflow-y: auto; font-size: 13px; margin-bottom: 15px; border-radius: 2px; }
         .btn-group { display: flex; flex-direction: column; gap: 8px; }
-        .btn { border: none; padding: 12px; cursor: pointer; font-weight: 600; border-radius: 2px; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+        .btn { border: none; padding: 12px; cursor: pointer; font-weight: 600; border-radius: 2px; }
         .btn-main { background: #0078d4; color: white; }
         .btn-ai { background: #8e24aa; color: white; }
-        .btn-outline { background: white; border: 1px solid #0078d4; color: #0078d4; display: none; }
+        .btn-translate { background: #ffffff; border: 1px solid #0078d4; color: #0078d4; display: none; }
         .btn-stop { background: #a4262c; color: white; margin-top: 5px; }
-        .btn:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
     <div class="card">
-        <div id="badge" class="status-badge priority-normal">Analizando...</div>
-        <div id="content">Esperando selección de correo...</div>
-        
+        <div id="badge" class="status-badge priority-normal">Listo</div>
+        <div id="content">Selecciona un correo...</div>
         <div class="btn-group">
-            <button id="btn-read" class="btn btn-main">🔊 LEER Y MARCAR LEÍDO</button>
-            <button id="btn-translate" class="btn btn-outline">🌍 TRADUCIR A ESPAÑOL</button>
-            <button id="btn-resumen" class="btn btn-ai">✨ RESUMEN INTELIGENTE</button>
-            <button id="btn-stop" class="btn btn-stop">⏹️ DETENER LECTURA</button>
+            <button id="btn-read" class="btn btn-main">🔊 LEER COMPLETO</button>
+            <button id="btn-resumen" class="btn btn-ai">✨ RESUMEN IA CORTO</button>
+            <button id="btn-translate" class="btn btn-translate">🌍 TRADUCIR A ESPAÑOL</button>
+            <button id="btn-stop" class="btn btn-stop">⏹️ DETENER</button>
         </div>
     </div>
 
@@ -44,88 +39,91 @@
 
         Office.onReady((info) => {
             if (info.host === Office.HostType.Outlook) {
-                // Detecta automáticamente cuando el usuario cambia de correo sin cerrar el panel
                 Office.context.mailbox.addHandlerAsync(Office.EventType.ItemChanged, cargarContenido);
                 cargarContenido();
             }
         });
 
         function cargarContenido() {
-            synth.cancel(); // Detener voz si se cambia de correo
+            synth.cancel();
             Office.context.mailbox.item.body.getAsync(Office.CoercionType.Text, (result) => {
                 if (result.status === Office.AsyncResultStatus.Succeeded) {
                     cuerpoOriginal = result.value.trim();
                     document.getElementById('content').innerText = cuerpoOriginal;
                     actualizarPrioridad(cuerpoOriginal);
-                    detectarIdioma(cuerpoOriginal);
+                    analizarIdiomaMejorado(cuerpoOriginal);
                 }
             });
         }
 
-        function detectarIdioma(texto) {
-            const palabrasIngles = ["the", "this", "hello", "regards", "meeting", "attached", "subject"];
-            const esIngles = palabrasIngles.some(p => texto.toLowerCase().includes(p));
+        // Nueva detección de idioma más inteligente
+        function analizarIdiomaMejorado(texto) {
+            const palabrasEsp = [" y ", " de ", " el ", " la ", " que ", " por ", " para "];
+            const palabrasEng = [" the ", " and ", " with ", " for ", " from ", " subject "];
             
-            const btnTrans = document.getElementById('btn-translate');
-            if (esIngles) {
+            let puntosEsp = palabrasEsp.filter(p => texto.toLowerCase().includes(p)).length;
+            let puntosEng = palabrasEng.filter(p => texto.toLowerCase().includes(p)).length;
+
+            const btnT = document.getElementById('btn-translate');
+            if (puntosEng > puntosEsp && puntosEng > 2) {
                 idiomaDetectado = "en";
-                btnTrans.style.display = "block";
+                btnT.style.display = "block";
             } else {
                 idiomaDetectado = "es";
-                btnTrans.style.display = "none";
+                btnT.style.display = "none";
             }
         }
 
-        function hablar(texto, lang = 'es-ES') {
+        function hablar(texto, lang = 'es-MX') {
             synth.cancel();
             const utterance = new SpeechSynthesisUtterance(texto);
+            
+            // Forzar voz mexicana si está disponible
+            const voces = synth.getVoices();
+            const vozMX = voces.find(v => v.lang === 'es-MX' || v.lang === 'es_MX');
+            if (vozMX) {
+                utterance.voice = vozMX;
+            }
+            
             utterance.lang = lang;
             utterance.rate = 1.0;
             synth.speak(utterance);
         }
 
-        function marcarComoLeido() {
-            Office.context.mailbox.item.readStateSetAsync(true);
-        }
-
-        // --- ACCIONES DE BOTONES ---
-
         document.getElementById('btn-read').onclick = () => {
             marcarComoLeido();
-            hablar(cuerpoOriginal, idiomaDetectado === "es" ? 'es-ES' : 'en-US');
-        };
-
-        document.getElementById('btn-translate').onclick = () => {
-            // Simulación visual de traducción
-            const textoTraducido = "[CONTENIDO TRADUCIDO AL ESPAÑOL]:\n\n" + cuerpoOriginal; 
-            document.getElementById('content').innerText = textoTraducido;
-            idiomaDetectado = "es"; // Ahora la lectura será en español
-            // No habla automáticamente, espera a que el usuario presione "Leer" o "Resumen"
+            hablar(cuerpoOriginal, idiomaDetectado === "es" ? 'es-MX' : 'en-US');
         };
 
         document.getElementById('btn-resumen').onclick = () => {
             if (!cuerpoOriginal) return;
             
-            // Algoritmo: Extrae hasta las primeras 3 oraciones completas
-            const oraciones = cuerpoOriginal.match(/[^\.!\?]+[\.!\?]+/g) || [cuerpoOriginal];
-            let resumen = "Resumen del asistente: ";
-            
-            if (oraciones.length >= 1) {
-                resumen += oraciones.slice(0, 3).join(" ");
-            } else {
-                resumen += cuerpoOriginal.substring(0, 150) + "...";
-            }
-            
-            document.getElementById('content').innerText = resumen;
-            hablar(resumen, 'es-ES');
+            // Resumen estricto: Solo toma la primera oración o los primeros 150 caracteres
+            const puntoIndex = cuerpoOriginal.indexOf('.');
+            let resumen = (puntoIndex > 20 && puntoIndex < 180) 
+                ? cuerpoOriginal.substring(0, puntoIndex + 1)
+                : cuerpoOriginal.substring(0, 150) + "...";
+
+            const textoFinal = "Resumen: " + resumen;
+            document.getElementById('content').innerText = textoFinal;
+            hablar(textoFinal, 'es-MX');
             marcarComoLeido();
+        };
+
+        document.getElementById('btn-translate').onclick = () => {
+            document.getElementById('content').innerText = "[TRADUCIENDO...]\n" + cuerpoOriginal;
+            idiomaDetectado = "es";
+            hablar("Traduciendo correo al español", 'es-MX');
         };
 
         document.getElementById('btn-stop').onclick = () => synth.cancel();
 
+        function marcarComoLeido() {
+            Office.context.mailbox.item.readStateSetAsync(true);
+        }
+
         function actualizarPrioridad(texto) {
-            const urgencia = /urgente|importante|error|falla|atención|prioridad|inmediato/i;
-            const esAlta = urgencia.test(texto);
+            const esAlta = /urgente|importante|error|falla|atención/i.test(texto);
             const badge = document.getElementById('badge');
             badge.innerText = esAlta ? "Prioridad: ALTA" : "Prioridad: NORMAL";
             badge.className = "status-badge " + (esAlta ? "priority-high" : "priority-normal");
