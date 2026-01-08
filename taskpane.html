@@ -1,76 +1,98 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Asistente Voz IA</title>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Asistente de Voz IA</title>
 
-  <!-- Office JS -->
-  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <link rel="stylesheet" href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/11.0.0/css/fabric.min.css" />
 
-  <style>
-    body {
-      font-family: Segoe UI, Arial, sans-serif;
-      margin: 0;
-      padding: 16px;
-      background-color: #f5f5f5;
-    }
-    h1 {
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
-    button {
-      padding: 10px 14px;
-      font-size: 14px;
-      cursor: pointer;
-      border: none;
-      border-radius: 4px;
-      background-color: #0078d4;
-      color: white;
-    }
-    button:hover {
-      background-color: #005a9e;
-    }
-    #status {
-      margin-top: 12px;
-      font-size: 13px;
-      color: #444;
-    }
-  </style>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; background-color: #f4f4f4; }
+        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { color: #0078d4; margin-bottom: 15px; text-align: center; }
+        .content-box { border: 1px solid #ccc; padding: 10px; min-height: 100px; max-height: 200px; overflow-y: auto; background: #fafafa; margin-bottom: 20px; font-size: 14px; }
+        .button-read { background-color: #0078d4; color: white; border: none; padding: 12px 20px; width: 100%; cursor: pointer; border-radius: 4px; font-weight: bold; font-size: 16px; }
+        .button-read:hover { background-color: #005a9e; }
+        .button-stop { background-color: #d83b01; color: white; border: none; padding: 8px; width: 100%; margin-top: 10px; cursor: pointer; border-radius: 4px; }
+        .status { font-size: 12px; color: #666; margin-top: 10px; text-align: center; }
+    </style>
 </head>
-
 <body>
-  <h1>Asistente Voz IA</h1>
+    <div class="container">
+        <div class="header">
+            <h2 class="ms-font-xl">Asistente de Voz</h2>
+        </div>
+        
+        <p><strong>Resumen del correo:</strong></p>
+        <div id="content" class="content-box">Cargando contenido del correo...</div>
+        
+        <button id="btn-read" class="button-read">🔊 Leer Correo</button>
+        <button id="btn-stop" class="button-stop">⏹️ Detener</button>
+        
+        <div id="status" class="status">Listo para leer</div>
+    </div>
 
-  <p>Este asistente permitirá leer correos por voz y procesarlos con IA.</p>
+    <script>
+        // Inicializar Office
+        Office.onReady((info) => {
+            if (info.host === Office.HostType.Outlook) {
+                obtenerContenidoCorreo();
+            }
+        });
 
-  <button id="btnLeer">Leer correo actual</button>
-
-  <div id="status"></div>
-
-  <script>
-    Office.onReady(() => {
-      document.getElementById("btnLeer").onclick = leerCorreo;
-    });
-
-    function leerCorreo() {
-      const item = Office.context.mailbox.item;
-
-      if (!item) {
-        document.getElementById("status").innerText = "No hay correo activo.";
-        return;
-      }
-
-      item.body.getAsync("text", result => {
-        if (result.status === Office.AsyncResultStatus.Succeeded) {
-          const texto = result.value.substring(0, 500);
-          document.getElementById("status").innerText =
-            "Contenido del correo (preview):\n\n" + texto;
-        } else {
-          document.getElementById("status").innerText =
-            "Error al leer el correo.";
+        function obtenerContenidoCorreo() {
+            const item = Office.context.mailbox.item;
+            
+            // Intentamos obtener el cuerpo del correo como texto plano
+            item.body.getAsync(Office.CoercionType.Text, (result) => {
+                if (result.status === Office.AsyncResultStatus.Succeeded) {
+                    document.getElementById('content').innerText = result.value;
+                } else {
+                    document.getElementById('content').innerText = "No se pudo obtener el cuerpo del correo.";
+                }
+            });
         }
-      });
-    }
-  </script>
+
+        // Configuración de Voz
+        const btnRead = document.getElementById('btn-read');
+        const btnStop = document.getElementById('btn-stop');
+        const status = document.getElementById('status');
+
+        btnRead.addEventListener('click', () => {
+            const textoALeer = document.getElementById('content').innerText;
+            
+            if ('speechSynthesis' in window) {
+                // Cancelar cualquier lectura previa
+                window.speechSynthesis.cancel();
+
+                const utterance = new SpeechSynthesisUtterance(textoALeer);
+                utterance.lang = 'es-ES'; // Cambia a 'es-MX' si prefieres
+                utterance.rate = 1.0;     // Velocidad normal
+
+                utterance.onstart = () => {
+                    status.innerText = "📣 Leyendo...";
+                    btnRead.style.opacity = "0.6";
+                };
+
+                utterance.onend = () => {
+                    status.innerText = "✅ Lectura finalizada";
+                    btnRead.style.opacity = "1";
+                };
+
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("Lo siento, tu navegador no soporta lectura de voz.");
+            }
+        });
+
+        btnStop.addEventListener('click', () => {
+            window.speechSynthesis.cancel();
+            status.innerText = "⏹️ Lectura detenida";
+            btnRead.style.opacity = "1";
+        });
+    </script>
 </body>
 </html>
