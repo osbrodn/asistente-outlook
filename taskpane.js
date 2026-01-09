@@ -49,29 +49,37 @@ async function procesarCorreo(modo) {
 }
 
 async function llamarIA(texto) {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${OPENAI_API_KEY.trim()}`
-        },
-        body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages: [
-                { 
-                    role: "system", 
-                    content: "Eres un asistente ejecutivo. Tu tarea es: 1. Si el correo no está en español, tradúcelo. 2. Resume el contenido en máximo 3 frases claras. 3. Usa un tono profesional en español de México." 
-                },
-                { role: "user", content: texto }
-            ],
-            max_tokens: 200
-        })
-    });
+    try {
+        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${OPENAI_API_KEY.trim()}`
+            },
+            body: JSON.stringify({
+                model: "gpt-4o-mini",
+                messages: [
+                    { role: "system", content: "Resumen ejecutivo en español de México." },
+                    { role: "user", content: texto }
+                ]
+            })
+        });
 
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error ? data.error.message : "Error en API");
-    return data.choices[0].message.content;
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error("Detalle del error:", errorData);
+            throw new Error(`OpenAI dice: ${errorData.error.message}`);
+        }
+
+        const data = await response.json();
+        return data.choices[0].message.content;
+
+    } catch (err) {
+        console.error("Error en Fetch:", err);
+        throw new Error("No hay conexión con la IA. Revisa el Manifest o tu API Key.");
+    }
 }
+
 
 function hablar(texto) {
     detenerVoz(); // Limpiar lecturas previas
