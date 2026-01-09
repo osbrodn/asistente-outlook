@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Asistente Ejecutivo IA</title>
+    <title>Asistente IA - Outlook</title>
 
     <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
 
@@ -13,24 +13,32 @@
             font-family: 'Segoe UI', Tahoma, sans-serif;
             padding: 20px;
             margin: 0;
-            background-color: #1a1a1a;
+            background-color: #1b1b1b; /* Modo oscuro */
             color: #ffffff;
         }
-        .app-container {
+        .container {
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
-        .status-box {
+        h2 {
+            font-size: 18px;
+            color: #0078d4;
+            margin-top: 0;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+        #output {
             background-color: #262626;
             border-left: 4px solid #0078d4;
             padding: 15px;
-            min-height: 100px;
+            min-height: 120px;
             font-size: 14px;
-            line-height: 1.6;
+            line-height: 1.5;
             border-radius: 4px;
             margin-bottom: 10px;
             white-space: pre-wrap;
+            word-wrap: break-word;
         }
         .btn {
             border: none;
@@ -40,29 +48,47 @@
             font-weight: 600;
             font-size: 14px;
             cursor: pointer;
-            transition: opacity 0.2s, transform 0.1s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            transition: background 0.2s;
+            text-align: center;
         }
-        .btn:active { transform: scale(0.98); }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        
+        .btn:disabled {
+            background-color: #444 !important;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        /* Colores de los botones */
         .blue { background-color: #0078d4; }
-        .purple { background-color: #8e24aa; }
-        .red { background-color: #d32f2f; }
+        .blue:hover { background-color: #005a9e; }
         
+        .purple { background-color: #8e24aa; }
+        .purple:hover { background-color: #6a1b9a; }
+        
+        .red { background-color: #d32f2f; }
+        .red:hover { background-color: #b71c1c; }
+
         .footer {
             margin-top: 20px;
-            font-size: 11px;
-            color: #888;
+            font-size: 10px;
+            color: #777;
             text-align: center;
         }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <div id="output" class="status-box">Selecciona un correo y elige una opción...</div>
+    <div class="container">
+        <h2>Asistente Ejecutivo IA</h2>
+        
+        <div id="output">Selecciona un mensaje para comenzar...</div>
 
-        <button id="btn-leer" class="btn blue">🔊 LEER CORREO COMPLETO</button>
+        <button id="btn-leer" class="btn blue">🔊 LEER CORREO</button>
+        <button id="btn-resumen" class="btn purple">✨ RESUMEN IA (MÉXICO)</button>
+        <button id="btn-detener" class="btn red">⏹️ DETENER VOZ</button>
+
+        <div class="footer">
+            Versión estable 2026 | Desarrollado para Outlook
+        </div>
+    </div>
+
+    <script type="text/javascript" src="taskpane.js"></script>
+</body>
+</html>
