@@ -50,20 +50,22 @@ async function procesarCorreo(modo) {
 
 async function llamarIA(texto) {
     try {
-        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+            const response = await fetch("https://api.openai.com/v1/chat/completions", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${OPENAI_API_KEY.trim()}`
-            },
-            body: JSON.stringify({
+                        "Content-Type": "application/json",
+                            "Authorization": `Bearer ${OPENAI_API_KEY.trim()}`
+                            // IMPORTANTE: No añadidas headers personalizados como 'Origin' o 'User-Agent', 
+                            // deja que el navegador los maneje.
+                    },
+             body: JSON.stringify({
                 model: "gpt-4o-mini",
                 messages: [
-                    { role: "system", content: "Resumen ejecutivo en español de México." },
-                    { role: "user", content: texto }
-                ]
-            })
-        });
+                 { role: "system", content: "Resumen corto en español de México." },
+                    { role: "user", content: textoCorreo }
+                             ]
+                                    })
+                                        });
 
         if (!response.ok) {
             const errorData = await response.json();
