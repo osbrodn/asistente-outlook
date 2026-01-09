@@ -4,77 +4,65 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Asistente de Resumen IA</title>
+    <title>Asistente Ejecutivo IA</title>
 
     <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
 
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
             padding: 20px;
-            background-color: #1b1b1b; /* Diseño Oscuro */
+            margin: 0;
+            background-color: #1a1a1a;
             color: #ffffff;
         }
-        .container {
+        .app-container {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
         }
-        .header {
-            border-bottom: 2px solid #0078d4;
-            padding-bottom: 10px;
-            margin-bottom: 10px;
-        }
-        button {
-            background-color: #0078d4;
-            color: white;
-            border: none;
-            padding: 12px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 4px;
-            transition: background 0.3s;
-        }
-        button:hover {
-            background-color: #005a9e;
-        }
-        button:disabled {
-            background-color: #444;
-            cursor: not-allowed;
-        }
-        #output {
-            background-color: #2d2d2d;
-            padding: 15px;
-            border-radius: 4px;
-            min-height: 100px;
-            line-height: 1.5;
+        .status-box {
+            background-color: #262626;
             border-left: 4px solid #0078d4;
+            padding: 15px;
+            min-height: 100px;
+            font-size: 14px;
+            line-height: 1.6;
+            border-radius: 4px;
+            margin-bottom: 10px;
             white-space: pre-wrap;
         }
-        .loader {
-            color: #0078d4;
-            display: none;
-            font-style: italic;
+        .btn {
+            border: none;
+            border-radius: 4px;
+            padding: 14px;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .blue { background-color: #0078d4; }
+        .purple { background-color: #8e24aa; }
+        .red { background-color: #d32f2f; }
+        
+        .footer {
+            margin-top: 20px;
+            font-size: 11px;
+            color: #888;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h3>Asistente de IA (GPT-4o)</h3>
-        </div>
-        
-        <p>Presiona el botón para resumir este correo con inteligencia artificial.</p>
-        
-        <button id="run-ai">GENERAR RESUMEN</button>
-        
-        <div id="loading-text" class="loader">Procesando con OpenAI...</div>
-        
-        <div id="output">El resumen aparecerá aquí...</div>
-    </div>
+    <div class="app-container">
+        <div id="output" class="status-box">Selecciona un correo y elige una opción...</div>
 
-    <script type="text/javascript" src="taskpane.js"></script>
-</body>
-</html>
+        <button id="btn-leer" class="btn blue">🔊 LEER CORREO COMPLETO</button>
