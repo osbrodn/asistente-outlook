@@ -19,8 +19,9 @@
   <SupportUrl DefaultValue="https://osbrodn.github.io/asistente-outlook/"/>
 
   <AppDomains>
-    <AppDomain>osbrodn.github.io</AppDomain>
-    <AppDomain>osbrodn.github.io/asistente-outlook</AppDomain>
+    <AppDomain>https://osbrodn.github.io/asistente-outlook</AppDomain>
+    <AppDomain>https://osbrodn.github.io</AppDomain>
+    <AppDomain>https://api.openai.com</AppDomain>
   </AppDomains>
 
   <Hosts>
