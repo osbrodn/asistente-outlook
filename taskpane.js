@@ -1,7 +1,7 @@
 /* global Office */
 
 // CONFIGURACIÓN DE SEGURIDAD
-const OPENAI_API_KEY = "TU_API_KEY_AQUI"; 
+const OPENAI_API_KEY = "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"; 
 let synth = window.speechSynthesis;
 
 Office.onReady((info) => {
