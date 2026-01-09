@@ -45,6 +45,10 @@
 
   <Permissions>ReadWriteMailbox</Permissions>
 
+  <ExtendedPermissions>
+  <ExtendedPermission>Network</ExtendedPermission>
+  </ExtendedPermissions>
+
   <Rule xsi:type="RuleCollection" Mode="And">
     <Rule xsi:type="ItemIs" ItemType="Message" FormType="Read"/>
   </Rule>
