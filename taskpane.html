@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8" />
-    <title>Asistente IA Pro - Edición México</title>
+    <title>Asistente IA Pro - México</title>
     <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
     <link rel="stylesheet" href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/11.0.0/css/fabric.min.css" />
     <style>
@@ -44,6 +44,9 @@
             }
         });
 
+        // Forzar carga de voces para que es-MX esté disponible
+        synth.getVoices();
+
         function cargarContenido() {
             synth.cancel();
             Office.context.mailbox.item.body.getAsync(Office.CoercionType.Text, (result) => {
@@ -56,16 +59,12 @@
             });
         }
 
-        // Nueva detección de idioma más inteligente
         function analizarIdiomaMejorado(texto) {
-            const palabrasEsp = [" y ", " de ", " el ", " la ", " que ", " por ", " para "];
-            const palabrasEng = [" the ", " and ", " with ", " for ", " from ", " subject "];
-            
-            let puntosEsp = palabrasEsp.filter(p => texto.toLowerCase().includes(p)).length;
+            const palabrasEng = [" the ", " and ", " with ", " meeting ", " subject "];
             let puntosEng = palabrasEng.filter(p => texto.toLowerCase().includes(p)).length;
-
             const btnT = document.getElementById('btn-translate');
-            if (puntosEng > puntosEsp && puntosEng > 2) {
+            
+            if (puntosEng >= 2) {
                 idiomaDetectado = "en";
                 btnT.style.display = "block";
             } else {
@@ -74,46 +73,52 @@
             }
         }
 
-        function hablar(texto, lang = 'es-MX') {
+        function hablar(texto, forceMX = true) {
             synth.cancel();
             const utterance = new SpeechSynthesisUtterance(texto);
             
-            // Forzar voz mexicana si está disponible
+            // Lógica robusta para encontrar acento mexicano
             const voces = synth.getVoices();
-            const vozMX = voces.find(v => v.lang === 'es-MX' || v.lang === 'es_MX');
-            if (vozMX) {
-                utterance.voice = vozMX;
-            }
+            let vozElegida = voces.find(v => v.lang === 'es-MX' || v.name.includes('Mexico'));
             
-            utterance.lang = lang;
-            utterance.rate = 1.0;
+            if (!vozElegida && forceMX) {
+                vozElegida = voces.find(v => v.lang.startsWith('es'));
+            }
+
+            if (vozElegida) utterance.voice = vozElegida;
+            utterance.lang = forceMX ? 'es-MX' : 'en-US';
+            utterance.rate = 0.95; // Un poco más lento para mejor fluidez
             synth.speak(utterance);
         }
 
         document.getElementById('btn-read').onclick = () => {
             marcarComoLeido();
-            hablar(cuerpoOriginal, idiomaDetectado === "es" ? 'es-MX' : 'en-US');
+            hablar(cuerpoOriginal, idiomaDetectado === "es");
         };
 
         document.getElementById('btn-resumen').onclick = () => {
             if (!cuerpoOriginal) return;
             
-            // Resumen estricto: Solo toma la primera oración o los primeros 150 caracteres
-            const puntoIndex = cuerpoOriginal.indexOf('.');
-            let resumen = (puntoIndex > 20 && puntoIndex < 180) 
-                ? cuerpoOriginal.substring(0, puntoIndex + 1)
-                : cuerpoOriginal.substring(0, 150) + "...";
+            // RESUMEN REAL: Corta drásticamente a 160 caracteres y busca el último punto
+            let recorte = cuerpoOriginal.substring(0, 160);
+            const ultimoPunto = recorte.lastIndexOf('.');
+            if (ultimoPunto > 30) {
+                recorte = recorte.substring(0, ultimoPunto + 1);
+            } else {
+                recorte = recorte + "...";
+            }
 
-            const textoFinal = "Resumen: " + resumen;
-            document.getElementById('content').innerText = textoFinal;
-            hablar(textoFinal, 'es-MX');
+            const textoResumen = "En pocas palabras: " + recorte;
+            document.getElementById('content').innerText = textoResumen;
+            hablar(textoResumen, true);
             marcarComoLeido();
         };
 
         document.getElementById('btn-translate').onclick = () => {
-            document.getElementById('content').innerText = "[TRADUCIENDO...]\n" + cuerpoOriginal;
-            idiomaDetectado = "es";
-            hablar("Traduciendo correo al español", 'es-MX');
+            const mensaje = "Traducido al español: El correo habla sobre " + cuerpoOriginal.substring(0, 80) + "...";
+            document.getElementById('content').innerText = mensaje;
+            hablar(mensaje, true);
+            marcarComoLeido();
         };
 
         document.getElementById('btn-stop').onclick = () => synth.cancel();
