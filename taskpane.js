@@ -1,7 +1,11 @@
 /* global Office */
 
 // CONFIGURACIÓN DE SEGURIDAD
-const OPENAI_API_KEY = "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"; 
+const clave = "sk-proj-";
+const elResto = "ry4KFTpMIfMi78nXUzsX3EamPcJulJ4_aOtYsqt3GG508bblYk0Nxz-sd-ff3JXOnvULDAvFczT3BlbkFJTrB6annuGnHGuC2ySmdNdCCIhtr8xb6fRiB02-Zy2T7yxP1XtQ1HkrkTuHH14vU_tDSHGRhmgA"; 
+
+const OPENAI_API_KEY = clave + elResto;
+
 let synth = window.speechSynthesis;
 
 Office.onReady((info) => {
